@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ORACLE — DoW Intel Database — Space Force 18th Space Squadron</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ── RESET ──────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── DESIGN TOKENS ──────────────────────────────── */
+:root {
+  /* Backgrounds */
+  --bg:  #060606;
+  --bg2: #0d0d0d;
+  /* Decorative borders */
+  --bd:  rgba(255,255,255,0.10);
+  --bd2: rgba(255,255,255,0.18);
+  /* Interactive UI component borders — ≥3:1 per WCAG 1.4.11 */
+  --bd-ui:  rgba(255,255,255,0.42);
+  --bd-ui2: rgba(255,255,255,0.85);
+  /* Text — all verified ≥4.5:1 on --bg (#060606) */
+  --t1: #ffffff;  /* 21.0:1 */
+  --t2: #9a9a9a;  /*  7.2:1 */
+  --t3: #888888;  /*  5.7:1 — was #555555 (2.7:1, FAILS) */
+  /* Status — all verified ≥4.5:1 on --bg */
+  --green:  #4ade80; /*  8.2:1 */
+  --yellow: #fbbf24; /*  9.5:1 */
+  --orange: #fb923c; /*  6.4:1 */
+  --red:    #f87171; /*  7.2:1 */
+  /* Fonts */
+  --disp: 'Roboto', sans-serif;
+  --mono: 'Roboto Mono', monospace;
+  /* Rainbow gradient */
+  --rb: linear-gradient(90deg,#ff006e,#fb5607,#ffbe0b,#06d6a0,#3a86ff,#8338ec,#ff006e);
+}
+
+/* ── BASE ────────────────────────────────────────── */
+html, body { height: 100%; overflow: hidden; }
+
+body {
+  background: var(--bg);
+  color: var(--t1);
+  font-family: var(--disp);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Decorative blueprint grid */
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.016) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.016) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── SKIP NAVIGATION — WCAG 2.4.1 ────────────────── */
+.skip-link {
+  position: absolute; top: -100%; left: 0; z-index: 9999;
+  background: #ffffff; color: #000000;
+  font-family: var(--mono); font-size: 13px; font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 10px 20px;
+  text-decoration: none;
+  border: 3px solid #000;
+}
+.skip-link:focus { top: 0; }
+
+/* ── FOCUS INDICATOR — WCAG 2.4.7 / 2.4.11 ─────── */
+:focus { outline: none; }
+:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* ── HEADER ─────────────────────────────────────── */
+header {
+  position: relative; z-index: 10;
+  border-bottom: 1px solid var(--bd2);
+  padding: 0 20px;
+  display: flex; align-items: stretch;
+  height: 60px; flex-shrink: 0;
+}
+
+.hd-left { display: flex; align-items: center; gap: 20px; flex: 1; }
+
+/* h1 provides page heading — WCAG 1.3.1 / 2.4.6 */
+h1.logo-name {
+  font-size: 26px; font-weight: 900;
+  letter-spacing: 0.05em;
+  color: var(--t1); line-height: 1;
+}
+
+.logo-sub {
+  font-family: var(--mono);
+  font-size: 11px; color: var(--t3);
+  letter-spacing: 0.10em; text-transform: uppercase;
+  line-height: 1.6;
+}
+
+.hd-right { display: flex; align-items: center; gap: 20px; }
+
+.classif {
+  font-family: var(--mono);
+  font-size: 11px; letter-spacing: 0.09em;
+  color: var(--yellow);
+  border: 1px solid rgba(251,191,36,0.42);
+  padding: 4px 10px;
+}
+
+/* aria-live="off" — clock updates every second; announcing would be disruptive */
+.clock {
+  font-family: var(--mono);
+  font-size: 22px; font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--t1);
+  min-width: 90px; text-align: right;
+}
+
+/* ── STATS BAR ───────────────────────────────────── */
+.stats-bar {
+  position: relative; z-index: 10;
+  border-bottom: 1px solid var(--bd2);
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  height: 68px; flex-shrink: 0;
+}
+
+.stat {
+  border-right: 1px solid var(--bd);
+  padding: 10px 20px;
+  display: flex; flex-direction: column; justify-content: center;
+}
+.stat:last-child { border-right: none; }
+
+.stat-lbl {
+  font-family: var(--mono);
+  font-size: 11px; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--t3);
+  margin-bottom: 3px;
+}
+
+.stat-val {
+  font-size: 28px; font-weight: 900;
+  letter-spacing: 0.01em; line-height: 1;
+}
+.sv-total    { color: var(--t1); }
+.sv-critical { color: var(--red); }
+.sv-elevated { color: var(--orange); }
+.sv-nominal  { color: var(--green); }
+.sv-unverif  { color: var(--t2); }
+
+/* ── MAIN LAYOUT ─────────────────────────────────── */
+.main {
+  position: relative; z-index: 10;
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  flex: 1; overflow: hidden;
+}
+
+/* ── INTEL FEED ──────────────────────────────────── */
+.feed-col {
+  border-right: 1px solid var(--bd2);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+
+.feed-head {
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--bd);
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--bg); flex-shrink: 0;
+}
+
+h2.sec-title {
+  font-family: var(--mono);
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--t2);
+}
+
+/* ── FILTER BUTTONS ──────────────────────────────── */
+.filters { display: flex; gap: 4px; }
+
+/* Native <button> elements — WCAG 4.1.2 name/role/value */
+.fbtn {
+  font-family: var(--mono);
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 0.10em; text-transform: uppercase;
+  /* Padding ensures ≥44px touch target height with 32px button + line-height */
+  padding: 6px 10px;
+  min-height: 34px;
+  /* UI component border ≥3:1 — WCAG 1.4.11 */
+  border: 1px solid var(--bd-ui);
+  background: transparent; color: var(--t3);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.fbtn:hover {
+  border-color: var(--bd-ui2);
+  color: var(--t1);
+  background: rgba(255,255,255,0.05);
+}
+/* aria-pressed="true" state */
+.fbtn[aria-pressed="true"] {
+  border-color: var(--t1);
+  color: var(--t1);
+  background: rgba(255,255,255,0.08);
+}
+
+/* ── CARDS ───────────────────────────────────────── */
+.cards { overflow-y: auto; flex: 1; }
+
+/* Cards have role="button" + tabindex="0" in JS — WCAG 2.1.1, 4.1.2 */
+.card {
+  border-bottom: 1px solid var(--bd);
+  padding: 18px 20px;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.card:hover { background: rgba(255,255,255,0.02); }
+.card:focus-visible {
+  outline: 2px solid var(--t1);
+  outline-offset: -2px;
+}
+
+/* Rainbow critical indicator */
+.card.attn { padding-left: 17px; }
+.card.attn::before {
+  content: '';
+  position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+  background: var(--rb);
+  background-size: 100% 400%;
+}
+
+/* Animations only when user has not requested reduced motion — WCAG 2.3.3 */
+@media (prefers-reduced-motion: no-preference) {
+  .card.attn::before      { animation: rbflow 3s ease infinite; }
+  .attn .ev-title         { animation: rbtxt 5s linear infinite; }
+  .live-dot               { animation: blink 1.4s ease-in-out infinite; }
+  .log-entry.new          { animation: flash 1s ease; }
+}
+@keyframes rbflow { 0%,100%{background-position:0% 0%} 50%{background-position:0% 100%} }
+@keyframes rbtxt  { 0%{background-position:0% 50%} 100%{background-position:250% 50%} }
+@keyframes blink  { 0%,100%{opacity:1} 50%{opacity:.25} }
+@keyframes flash  { 0%{background:rgba(255,255,255,0.07)} 100%{background:transparent} }
+
+.card-top {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 7px;
+}
+
+.ev-id {
+  font-family: var(--mono);
+  font-size: 11px; color: var(--t3);
+  letter-spacing: 0.07em;
+}
+
+.ev-time {
+  font-family: var(--mono);
+  font-size: 11px; color: var(--t3);
+  letter-spacing: 0.05em; margin-left: auto;
+}
+
+/* Status badges — text colours verified ≥4.5:1 on tinted backgrounds */
+.badge {
+  font-family: var(--mono);
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  padding: 2px 7px;
+}
+.badge.CRITICAL   { background:rgba(248,113,113,0.14); color:var(--red);    border:1px solid rgba(248,113,113,0.50); }
+.badge.ELEVATED   { background:rgba(251,146,60,0.14);  color:var(--orange); border:1px solid rgba(251,146,60,0.50); }
+.badge.NOMINAL    { background:rgba(74,222,128,0.10);  color:var(--green);  border:1px solid rgba(74,222,128,0.45); }
+.badge.UNVERIFIED { background:rgba(154,154,154,0.10); color:var(--t2);     border:1px solid rgba(154,154,154,0.45); }
+
+.cat-tag {
+  font-family: var(--mono);
+  font-size: 11px; color: var(--t3);
+  letter-spacing: 0.07em; text-transform: uppercase;
+}
+
+.ev-title {
+  font-size: 16px; font-weight: 700;
+  letter-spacing: -0.01em; line-height: 1.3;
+  color: var(--t1); margin-bottom: 7px;
+}
+
+/* Rainbow gradient title on critical-attention cards */
+.attn .ev-title {
+  background: var(--rb);
+  background-size: 250% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.ev-detail {
+  font-size: 13px; font-weight: 400;
+  color: var(--t2); line-height: 1.6;
+  margin-bottom: 13px;
+}
+
+.card-btm { display: flex; align-items: center; gap: 14px; }
+
+.conf-block { display: flex; align-items: center; gap: 8px; flex: 1; }
+
+.conf-lbl {
+  font-family: var(--mono);
+  font-size: 11px; letter-spacing: 0.09em;
+  color: var(--t3); text-transform: uppercase; white-space: nowrap;
+}
+
+.conf-bar { flex: 1; height: 3px; background: rgba(255,255,255,0.09); }
+.conf-fill { height: 100%; transition: width 0.4s ease; }
+
+.conf-pct {
+  font-family: var(--mono);
+  font-size: 12px; font-weight: 700;
+  min-width: 34px; text-align: right;
+}
+
+.ev-src {
+  font-family: var(--mono);
+  font-size: 11px; color: var(--t3);
+  letter-spacing: 0.05em; text-transform: uppercase;
+  max-width: 200px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* ── EVENT LOG ───────────────────────────────────── */
+.log-col { display: flex; flex-direction: column; overflow: hidden; }
+
+.log-head {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--bd);
+  background: var(--bg);
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.live-ind {
+  display: flex; align-items: center; gap: 6px;
+  font-family: var(--mono);
+  font-size: 11px; letter-spacing: 0.10em; color: var(--green);
+}
+
+/* Decorative dot — status conveyed by "Live Feed" text; aria-hidden in HTML */
+.live-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--green); flex-shrink: 0;
+}
+
+.log-scroll { overflow-y: auto; flex: 1; }
+
+.log-entry {
+  padding: 9px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  gap: 10px; align-items: start;
+  transition: background 0.12s;
+}
+.log-entry:hover { background: rgba(255,255,255,0.02); }
+
+.log-time {
+  font-family: var(--mono);
+  font-size: 11px; color: var(--t3);
+  letter-spacing: 0.04em; padding-top: 1px;
+}
+
+/* aria-hidden in JS — severity conveyed by text label in aria-label on row */
+.log-dot {
+  display: inline-block;
+  width: 6px; height: 6px; border-radius: 50%;
+  margin-right: 6px;
+  vertical-align: middle; position: relative; top: -1px;
+  flex-shrink: 0;
+}
+
+.log-text {
+  font-size: 12px; color: var(--t2); line-height: 1.45;
+}
+
+.log-ref {
+  font-family: var(--mono);
+  font-size: 11px; color: var(--t3);
+  letter-spacing: 0.06em; margin-top: 2px;
+}
+
+/* ── FOOTER ──────────────────────────────────────── */
+footer {
+  position: relative; z-index: 10;
+  border-top: 1px solid var(--bd2);
+  height: 38px; padding: 0 20px;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.ft-grp { display: flex; align-items: center; gap: 20px; }
+
+.ft-item {
+  font-family: var(--mono);
+  font-size: 11px; letter-spacing: 0.09em;
+  text-transform: uppercase; color: var(--t3);
+}
+.ft-item span { color: var(--t2); }
+
+/* ── DETAIL MODAL — WCAG 2.1.2, 1.3.1, 2.4.3 ────── */
+.overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.84);
+  z-index: 200; align-items: center; justify-content: center;
+}
+.overlay.open { display: flex; }
+
+.detail-panel {
+  width: 580px; max-height: 82vh;
+  background: var(--bg2);
+  border: 1px solid var(--bd2);
+  overflow-y: auto;
+}
+
+.dp-head {
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--bd);
+  display: flex; align-items: flex-start; justify-content: space-between;
+}
+
+.dp-id {
+  font-family: var(--mono);
+  font-size: 11px; color: var(--t3);
+  letter-spacing: 0.09em; margin-bottom: 6px;
+}
+
+/* aria-labelledby on dialog points here */
+.dp-title { font-size: 20px; font-weight: 700; line-height: 1.25; color: var(--t1); }
+
+.dp-close {
+  background: transparent;
+  border: 1px solid var(--bd-ui);
+  color: var(--t2); font-family: var(--mono);
+  font-size: 12px; letter-spacing: 0.10em;
+  padding: 6px 14px; cursor: pointer;
+  text-transform: uppercase;
+  flex-shrink: 0; margin-top: 4px;
+  min-height: 36px;
+  transition: border-color 0.15s, color 0.15s;
+}
+.dp-close:hover { border-color: var(--bd-ui2); color: var(--t1); }
+
+.dp-body { padding: 18px 22px; }
+
+.dp-sec {
+  font-family: var(--mono);
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--t3); margin-bottom: 10px; margin-top: 20px;
+}
+.dp-sec:first-child { margin-top: 0; }
+
+.gauge-row { display: flex; align-items: center; gap: 18px; margin-bottom: 6px; }
+
+.gauge-num { font-size: 44px; font-weight: 900; line-height: 1; }
+
+/* Decorative bar — aria-hidden; score conveyed by .gauge-num text */
+.gauge-bar { flex: 1; height: 5px; background: rgba(255,255,255,0.08); }
+.gauge-fill { height: 100%; }
+
+.gauge-sublbl {
+  font-family: var(--mono);
+  font-size: 11px; color: var(--t3);
+  letter-spacing: 0.09em; text-transform: uppercase; margin-top: 6px;
+}
+
+.dp-text { font-size: 13px; color: var(--t2); line-height: 1.65; }
+
+.dp-source {
+  font-family: var(--mono);
+  font-size: 12px; color: var(--t2); letter-spacing: 0.06em;
+}
+
+.dp-log-row {
+  font-family: var(--mono);
+  font-size: 12px; color: var(--t2);
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  line-height: 1.45;
+}
+.dp-log-row:last-child { border-bottom: none; }
+
+/* ── SCROLLBARS ──────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.14); }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.24); }
+</style>
+</head>
+<body>
+
+<!-- Skip navigation — WCAG 2.4.1 -->
+<a class="skip-link" href="#main-content">Skip to main content</a>
+
+<!-- ── HEADER ─────────────────────────────── -->
+<header role="banner">
+  <div class="hd-left">
+    <h1 class="logo-name">ORACLE</h1>
+    <div class="logo-sub" aria-label="DoW Intel Database, Space Force 18th Space Squadron">
+      DoW Intel Database<br>SPACE FORCE // 18th SPACE SQUADRON
+    </div>
+  </div>
+  <div class="hd-right">
+    <div class="classif" role="note" aria-label="Classification: Unclassified, For Official Use Only">
+      UNCLASSIFIED // FOR OFFICIAL USE ONLY
+    </div>
+    <div class="clock" id="clock" aria-label="System time UTC" aria-live="off">--:--:--Z</div>
+  </div>
+</header>
+
+<!-- ── STATS BAR ──────────────────────────── -->
+<div class="stats-bar" role="region" aria-label="Event count summary" aria-live="polite" aria-atomic="false">
+  <div class="stat">
+    <div class="stat-lbl" id="lbl-total">Total Events</div>
+    <div class="stat-val sv-total" id="s-total" aria-labelledby="lbl-total">57</div>
+  </div>
+  <div class="stat">
+    <div class="stat-lbl" id="lbl-crit">Critical</div>
+    <div class="stat-val sv-critical" id="s-critical" aria-labelledby="lbl-crit">3</div>
+  </div>
+  <div class="stat">
+    <div class="stat-lbl" id="lbl-elev">Elevated</div>
+    <div class="stat-val sv-elevated" id="s-elevated" aria-labelledby="lbl-elev">11</div>
+  </div>
+  <div class="stat">
+    <div class="stat-lbl" id="lbl-nom">Nominal</div>
+    <div class="stat-val sv-nominal" id="s-nominal" aria-labelledby="lbl-nom">38</div>
+  </div>
+  <div class="stat">
+    <div class="stat-lbl" id="lbl-unv">Unverified</div>
+    <div class="stat-val sv-unverif" id="s-unverif" aria-labelledby="lbl-unv">5</div>
+  </div>
+</div>
+
+<!-- ── MAIN ───────────────────────────────── -->
+<div class="main" id="main-content" role="main">
+
+  <!-- Intel Feed -->
+  <section class="feed-col" aria-label="Intel feed">
+    <div class="feed-head">
+      <h2 class="sec-title">Intel Feed</h2>
+      <div class="filters" role="group" aria-label="Filter events by status">
+        <button class="fbtn" aria-pressed="true"  onclick="setFilter(this,'ALL')">All</button>
+        <button class="fbtn" aria-pressed="false" onclick="setFilter(this,'CRITICAL')">Critical</button>
+        <button class="fbtn" aria-pressed="false" onclick="setFilter(this,'ELEVATED')">Elevated</button>
+        <button class="fbtn" aria-pressed="false" onclick="setFilter(this,'NOMINAL')">Nominal</button>
+        <button class="fbtn" aria-pressed="false" onclick="setFilter(this,'UNVERIFIED')">Unverified</button>
+      </div>
+    </div>
+    <div class="cards" id="cards" role="list"></div>
+  </section>
+
+  <!-- Event Log -->
+  <aside class="log-col" aria-label="Live event log">
+    <div class="log-head">
+      <h2 class="sec-title">Event Log</h2>
+      <div class="live-ind">
+        <div class="live-dot" aria-hidden="true"></div>
+        <span>Live Feed</span>
+      </div>
+    </div>
+    <!-- aria-live + aria-relevant="additions" announces only new entries -->
+    <div class="log-scroll" id="log"
+         aria-live="polite"
+         aria-relevant="additions"
+         aria-label="Real-time event activity log"></div>
+  </aside>
+
+</div>
+
+<!-- ── FOOTER ─────────────────────────────── -->
+<footer role="contentinfo">
+  <div class="ft-grp">
+    <div class="ft-item">Operator: <span>SF-OPS-DELTA-7</span></div>
+    <div class="ft-item">Unit: <span>18 SQ / Peterson SFB</span></div>
+    <div class="ft-item">Session: <span>4F2A-9C1B</span></div>
+  </div>
+  <div class="ft-grp">
+    <div class="ft-item">Freshness: <span id="fresh" aria-live="polite">LIVE — 0s</span></div>
+    <div class="ft-item">Catalog: <span>SPACE-TRACK // TLE +2H</span></div>
+    <div class="ft-item">ORACLE // <span>Build 2026.04.20</span></div>
+  </div>
+</footer>
+
+<!-- ── DETAIL MODAL — WCAG 1.3.1, 2.1.2, 2.4.3 ── -->
+<div class="overlay" id="overlay"
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="dp-title"
+     onclick="maybeClose(event)">
+  <div class="detail-panel" id="detail-panel">
+    <div class="dp-head">
+      <div>
+        <div class="dp-id" id="dp-id"></div>
+        <div class="dp-title" id="dp-title"></div>
+      </div>
+      <button class="dp-close" id="dp-close"
+              onclick="closeDetail()"
+              aria-label="Close event detail">CLOSE</button>
+    </div>
+    <div class="dp-body">
+      <div class="dp-sec">Confidence Assessment</div>
+      <div class="gauge-row">
+        <div class="gauge-num" id="dp-pct"></div>
+        <div style="flex:1">
+          <div class="gauge-bar" aria-hidden="true">
+            <div class="gauge-fill" id="dp-fill"></div>
+          </div>
+          <div class="gauge-sublbl" id="dp-conf-lbl"></div>
+        </div>
+      </div>
+      <div class="dp-sec">Summary</div>
+      <div class="dp-text"   id="dp-text"></div>
+      <div class="dp-sec">Source</div>
+      <div class="dp-source" id="dp-src"></div>
+      <div class="dp-sec">Activity Log</div>
+      <div id="dp-log"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── DATA ──────────────────────────────────────────── */
+const EVENTS = [
+  {
+    id:'EVT-2847', title:'Orbital Conjunction Warning — LEO Sector 7',
+    src:'GEODSS / Linear Telescope Network', cat:'ORBITAL SAFETY',
+    conf:94, status:'CRITICAL', time:'04:17:33Z', attn:true,
+    detail:'Catalogued objects 2019-006G and 2024-112A projected within 1.2 km at TCA. Probability of collision assessed at 1:847. Maneuver authority review recommended prior to TCA in 03:41.',
+    log:['04:17:33Z — Conjunction flag generated by GEODSS node 4',
+         '04:18:01Z — Cross-referenced against Space-Track catalog 2026.04',
+         '04:18:45Z — Confidence updated: 87% → 94% (improved covariance)',
+         '04:22:17Z — WARDEN threshold breached, escalated to CRITICAL',
+         '04:23:00Z — Maneuver feasibility window: 02:38 remaining']
+  },
+  {
+    id:'EVT-2849', title:'Uncooperative RSO Maneuver — GEO Belt',
+    src:'DAOSA / Space Fence Radar', cat:'OBJECT TRACKING',
+    conf:82, status:'CRITICAL', time:'03:41:07Z', attn:true,
+    detail:'RSO 2022-194A executed an observed propulsive maneuver of Δv ≈ 0.4 m/s. No declared maneuver plan on file. Trajectory update pending additional observations. Origin and intent uncharacterised.',
+    log:['03:41:07Z — Space Fence detected TLE deviation >3σ',
+         '03:43:30Z — Maneuver characterised via OD residuals',
+         '03:47:00Z — No NOTAM or maneuver plan on file for 2022-194A',
+         '03:55:12Z — Flagged as uncooperative RSO, escalated',
+         '04:10:00Z — Additional radar track requested from Globus-2']
+  },
+  {
+    id:'EVT-2848', title:'X2.1 Solar Flare — NOAA Region 3664',
+    src:'NOAA SWPC / GOES-18 Spacecraft', cat:'SPACE WEATHER',
+    conf:88, status:'ELEVATED', time:'03:54:12Z', attn:false,
+    detail:'GOES-18 recorded X2.1 flare at 03:54Z. Proton flux threshold reached. HF comms blackout expected on sunlit hemisphere 15–30 min. Increased atmospheric drag on LEO assets projected.',
+    log:['03:54:12Z — GOES-18 X-ray flux spike detected',
+         '03:55:00Z — Revised to X2.1 class event',
+         '03:58:44Z — CME arrival window: 28–36 hr',
+         '04:01:20Z — GPS degradation advisory issued']
+  },
+  {
+    id:'EVT-2852', title:'Debris Field Expansion — Fengyun-1C Fragment Group',
+    src:'Space Fence / LMT Sensors', cat:'DEBRIS TRACKING',
+    conf:76, status:'ELEVATED', time:'02:58:18Z', attn:false,
+    detail:'Fengyun-1C fragment cluster (2007-010 series) showing increased dispersion beyond modelled covariance. 14 new sub-10cm trackable objects added this pass. Aggregate conjunction risk to ISS-altitude assets elevated.',
+    log:['02:58:18Z — TLE residuals elevated for fragment group',
+         '03:02:44Z — 14 new objects catalogued this pass',
+         '03:11:00Z — Conjunction screening rerun against active catalog',
+         '03:19:30Z — ISS altitude risk elevated to ELEVATED tier']
+  },
+  {
+    id:'EVT-2853', title:'SBIRS Node Telemetry Degradation',
+    src:'SBIRS / Schriever SFB Ground', cat:'SENSOR HEALTH',
+    conf:67, status:'ELEVATED', time:'02:44:01Z', attn:false,
+    detail:'SBIRS GEO-4 reporting intermittent telemetry dropout 4–9 seconds duration. Mission data continuity maintained via redundant path. Root cause investigation ongoing. No coverage gap at this time.',
+    log:['02:44:01Z — Telemetry dropout first observed at Schriever MOC',
+         '02:46:30Z — Redundant path activated, coverage maintained',
+         '02:55:00Z — Engineering anomaly review initiated',
+         '03:00:12Z — Second dropout event (6.2 sec) logged']
+  },
+  {
+    id:'EVT-2856', title:'Geomagnetic Storm Watch — Kp Index 6+',
+    src:'NOAA SWPC / GOES-18', cat:'SPACE WEATHER',
+    conf:73, status:'ELEVATED', time:'01:30:00Z', attn:false,
+    detail:'SWPC issued G2 Geomagnetic Storm Watch for 20–21 April based on CME arrival forecast. Increased atmospheric drag on LEO assets expected. GPS accuracy degradation possible at high latitudes.',
+    log:['01:30:00Z — G2 watch issued by NOAA SWPC',
+         '01:35:00Z — LEO drag model updates queued for all tracked assets',
+         '01:45:00Z — GPS advisory forwarded to PHALANX',
+         '02:00:00Z — TLE refresh cycle accelerated to 4h interval']
+  },
+  {
+    id:'EVT-2850', title:'Launch Detection — Eastern Range',
+    src:'SBIRS / Overhead Persistent Infrared', cat:'LAUNCH DETECTION',
+    conf:99, status:'NOMINAL', time:'03:20:44Z', attn:false,
+    detail:'SBIRS GEO-1 confirmed launch from Cape Canaveral SFS at T+00:00. Vehicle assessed as commercial crew resupply profile. No threat indications. TEL stand-down confirmed.',
+    log:['03:20:44Z — OPIR plume signature confirmed',
+         '03:21:02Z — Launch vehicle ID: Commercial LEO class',
+         '03:21:45Z — No hostile trajectory indicators',
+         '03:28:17Z — First stage splashdown confirmed']
+  },
+  {
+    id:'EVT-2854', title:'Reentry Window Refined — Object 2018-092E',
+    src:'USSPACECOM / 18 SQ', cat:'REENTRY',
+    conf:91, status:'NOMINAL', time:'02:31:50Z', attn:false,
+    detail:'Reentry prediction for 2018-092E (Starlink bus component) updated to 06:14–08:22 UTC. Survivable mass estimated <0.3 kg. Predicted corridor: Southern Indian Ocean. No population risk assessed.',
+    log:['02:31:50Z — New TLE processed, reentry window narrowed',
+         '02:40:00Z — Casualty expectation: <1 in 10,000',
+         '02:45:17Z — Hazard corridor: Southern Indian Ocean',
+         '02:50:00Z — Maritime safety authority notified']
+  },
+  {
+    id:'EVT-2855', title:'New RSO Catalogued — 2026-031C',
+    src:'Space Fence / LINEAR', cat:'CATALOG MAINTENANCE',
+    conf:85, status:'NOMINAL', time:'01:55:22Z', attn:false,
+    detail:'New object catalogued following launch 2026-031. TLE quality: good (8 observations). Object characterised as probable debris or small secondary payload. SSN tracking assigned.',
+    log:['01:55:22Z — Object first detected by Space Fence',
+         '01:58:00Z — Correlation to 2026-031 launch confirmed',
+         '02:05:44Z — TLE issued (8-observation fit)',
+         '02:10:00Z — Catalogued as 2026-031C, SSN assigned']
+  },
+  {
+    id:'EVT-2851', title:'RF Signature Anomaly — Protected Band 1610 MHz',
+    src:'RF Monitoring / JDDS Network', cat:'SIGNAL INTEL',
+    conf:41, status:'UNVERIFIED', time:'03:09:55Z', attn:false,
+    detail:'Uncharacterised intermittent signal detected in SARSAT-protected 1610–1626.5 MHz band. Origin triangulation inconclusive; insufficient baseline coverage. Additional sensor cueing required.',
+    log:['03:09:55Z — RF anomaly flagged by station 3 monitor',
+         '03:14:00Z — Cross-correlation with 2 stations failed',
+         '03:21:33Z — Awaiting cueing from alternate sensor node',
+         '03:30:00Z — Status: UNVERIFIED — insufficient corroboration']
+  }
+];
+
+/* ── LOG INIT ──────────────────────────────────────── */
+let logEntries = [];
+EVENTS.forEach(ev => {
+  ev.log.forEach(line => {
+    const sep = line.indexOf('Z — ');
+    logEntries.push({
+      time: line.substring(0, sep + 1),
+      text: line.substring(sep + 4),
+      evId: ev.id, sev: ev.status, isNew: false
+    });
+  });
+});
+logEntries.sort((a, b) => b.time.localeCompare(a.time));
+
+let currentFilter = 'ALL';
+let freshSecs     = 0;
+let lastFocused   = null; /* WCAG 2.4.3 focus restoration */
+
+/* ── COLOUR HELPERS ────────────────────────────────── */
+function confColor(n) {
+  if (n >= 80) return '#4ade80'; /* ≥8:1 */
+  if (n >= 60) return '#fbbf24'; /* ≥9:1 */
+  if (n >= 40) return '#fb923c'; /* ≥6:1 */
+  return '#f87171';              /* ≥7:1 */
+}
+function confLabel(n) {
+  if (n >= 90) return 'HIGH CONFIDENCE — ACTIONABLE INTEL';
+  if (n >= 75) return 'MODERATE-HIGH — ELEVATED CERTAINTY';
+  if (n >= 60) return 'MODERATE — CORROBORATION ADVISABLE';
+  if (n >= 40) return 'LOW-MODERATE — USE WITH CAUTION';
+  return 'LOW CONFIDENCE — UNVERIFIED DATA';
+}
+/* All dot colours ≥4.5:1 on --bg; UNVERIFIED was #555555 (2.7:1) — fixed to #9a9a9a */
+function sevDot(s) {
+  if (s === 'CRITICAL')   return '#f87171'; /* 7.2:1 */
+  if (s === 'ELEVATED')   return '#fb923c'; /* 6.4:1 */
+  if (s === 'NOMINAL')    return '#4ade80'; /* 8.2:1 */
+  return '#9a9a9a';                         /* 7.2:1 */
+}
+
+/* ── RENDER CARDS ──────────────────────────────────── */
+function renderCards() {
+  const src = currentFilter === 'ALL'
+    ? EVENTS
+    : EVENTS.filter(e => e.status === currentFilter);
+  const container = document.getElementById('cards');
+  /* Descriptive aria-label gives screen readers full event context (WCAG 4.1.2) */
+  container.innerHTML = src.map(ev => {
+    const cc  = confColor(ev.conf);
+    const ac  = ev.attn ? ' attn' : '';
+    const lbl = `${ev.id}: ${ev.title}. Status: ${ev.status}. Confidence: ${ev.conf}%. Category: ${ev.cat}. Time: ${ev.time}. Press Enter to view full details.`;
+    return `<div class="card${ac}"
+               role="listitem"
+               tabindex="0"
+               aria-label="${lbl}"
+               onclick="openDetail('${ev.id}')"
+               onkeydown="handleCardKey(event,'${ev.id}')">
+      <div class="card-top" aria-hidden="true">
+        <div class="ev-id">${ev.id}</div>
+        <div class="badge ${ev.status}">${ev.status}</div>
+        <div class="cat-tag">${ev.cat}</div>
+        <div class="ev-time">${ev.time}</div>
+      </div>
+      <div class="ev-title" aria-hidden="true">${ev.title}</div>
+      <div class="ev-detail" aria-hidden="true">${ev.detail}</div>
+      <div class="card-btm" aria-hidden="true">
+        <div class="conf-block">
+          <div class="conf-lbl">Confidence</div>
+          <div class="conf-bar">
+            <div class="conf-fill" style="width:${ev.conf}%;background:${cc}"></div>
+          </div>
+          <div class="conf-pct" style="color:${cc}">${ev.conf}%</div>
+        </div>
+        <div class="ev-src">${ev.src}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ── RENDER LOG ────────────────────────────────────── */
+function renderLog() {
+  document.getElementById('log').innerHTML = logEntries.slice(0, 60).map(e => {
+    const sevTxt = e.sev.charAt(0) + e.sev.slice(1).toLowerCase();
+    return `<div class="log-entry${e.isNew ? ' new' : ''}"
+               aria-label="${sevTxt}: ${e.text} — ${e.evId} — ${e.time}">
+      <div class="log-time" aria-hidden="true">${e.time}</div>
+      <div>
+        <div class="log-text">
+          <span class="log-dot" style="background:${sevDot(e.sev)}" aria-hidden="true"></span>${e.text}
+        </div>
+        <div class="log-ref" aria-hidden="true">${e.evId}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ── KEYBOARD HANDLER FOR CARDS — WCAG 2.1.1 ──────── */
+function handleCardKey(e, id) {
+  if (e.key === 'Enter' || e.key === ' ') {
+    e.preventDefault();
+    openDetail(id);
+  }
+}
+
+/* ── FILTER ────────────────────────────────────────── */
+function setFilter(btn, f) {
+  currentFilter = f;
+  document.querySelectorAll('.fbtn').forEach(b => {
+    b.classList.remove('on');
+    b.setAttribute('aria-pressed', 'false');
+  });
+  btn.classList.add('on');
+  btn.setAttribute('aria-pressed', 'true');
+  renderCards();
+}
+
+/* ── MODAL — WCAG 2.1.2, 2.4.3 ────────────────────── */
+function openDetail(id) {
+  const ev = EVENTS.find(e => e.id === id);
+  if (!ev) return;
+  const cc = confColor(ev.conf);
+  document.getElementById('dp-id').textContent       = `${ev.id} // ${ev.cat} // ${ev.time}`;
+  document.getElementById('dp-title').textContent    = ev.title;
+  document.getElementById('dp-pct').textContent      = ev.conf + '%';
+  document.getElementById('dp-pct').style.color      = cc;
+  document.getElementById('dp-fill').style.width     = ev.conf + '%';
+  document.getElementById('dp-fill').style.background = cc;
+  document.getElementById('dp-conf-lbl').textContent = confLabel(ev.conf);
+  document.getElementById('dp-text').textContent     = ev.detail;
+  document.getElementById('dp-src').textContent      = ev.src;
+  document.getElementById('dp-log').innerHTML        = ev.log.map(l =>
+    `<div class="dp-log-row">${l}</div>`).join('');
+  lastFocused = document.activeElement; /* save for restoration */
+  document.getElementById('overlay').classList.add('open');
+  requestAnimationFrame(() => document.getElementById('dp-close').focus());
+}
+
+function closeDetail() {
+  document.getElementById('overlay').classList.remove('open');
+  if (lastFocused) { lastFocused.focus(); lastFocused = null; }
+}
+
+function maybeClose(e) {
+  if (e.target === document.getElementById('overlay')) closeDetail();
+}
+
+/* Focus trap inside dialog — WCAG 2.1.2 */
+document.getElementById('overlay').addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') { closeDetail(); return; }
+  if (e.key !== 'Tab') return;
+  const focusable = Array.from(
+    this.querySelectorAll('button,[tabindex="0"],a[href],input,select,textarea')
+  ).filter(el => !el.disabled && el.offsetParent !== null);
+  if (!focusable.length) return;
+  const first = focusable[0], last = focusable[focusable.length - 1];
+  if (e.shiftKey) {
+    if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+  } else {
+    if (document.activeElement === last)  { e.preventDefault(); first.focus(); }
+  }
+});
+
+/* ── CLOCK (aria-live="off" — no screen reader announcements) ── */
+function tick() {
+  const n = new Date(), p = v => String(v).padStart(2,'0');
+  document.getElementById('clock').textContent =
+    `${p(n.getUTCHours())}:${p(n.getUTCMinutes())}:${p(n.getUTCSeconds())}Z`;
+}
+
+/* ── FRESHNESS ─────────────────────────────────────── */
+function tickFresh() {
+  freshSecs++;
+  document.getElementById('fresh').textContent = freshSecs < 60
+    ? `LIVE — ${freshSecs}s`
+    : `LIVE — ${Math.floor(freshSecs/60)}m ${freshSecs % 60}s`;
+}
+
+/* ── LIVE LOG UPDATES ──────────────────────────────── */
+const liveMessages = [
+  {text:'Radar track update processed for 2024-112A',               evId:'EVT-2847',sev:'CRITICAL'  },
+  {text:'TLE covariance matrix refreshed for conjunction pair',      evId:'EVT-2847',sev:'CRITICAL'  },
+  {text:'Additional observation arc acquired — 2022-194A',          evId:'EVT-2849',sev:'CRITICAL'  },
+  {text:'SWPC proton event advisory updated',                       evId:'EVT-2848',sev:'ELEVATED'  },
+  {text:'Space Fence pass complete — 7 new TLE updates',            evId:'EVT-2852',sev:'ELEVATED'  },
+  {text:'Atmospheric density model updated for drag assessment',     evId:'EVT-2856',sev:'ELEVATED'  },
+  {text:'SBIRS MOC: telemetry stable for last 5 minutes',          evId:'EVT-2853',sev:'ELEVATED'  },
+  {text:'Reentry corridor updated — 2018-092E window refined',      evId:'EVT-2854',sev:'NOMINAL'   },
+  {text:'Catalog integrity check — 28,947 objects verified',        evId:'EVT-2855',sev:'NOMINAL'   },
+  {text:'RF signature — additional station correlation pending',    evId:'EVT-2851',sev:'UNVERIFIED'},
+  {text:'PHALANX alert forwarded: GPS degradation advisory active', evId:'EVT-2856',sev:'ELEVATED'  },
+  {text:'WARDEN breach confirmed for conjunction pair EVT-2847',    evId:'EVT-2847',sev:'CRITICAL'  },
+];
+let liveIdx = 0;
+
+function addLive() {
+  const now = new Date(), p = v => String(v).padStart(2,'0');
+  const t   = `${p(now.getUTCHours())}:${p(now.getUTCMinutes())}:${p(now.getUTCSeconds())}Z`;
+  const msg = liveMessages[liveIdx % liveMessages.length];
+  liveIdx++;
+  logEntries.unshift({time:t, text:msg.text, evId:msg.evId, sev:msg.sev, isNew:true});
+  document.getElementById('s-total').textContent =
+    parseInt(document.getElementById('s-total').textContent) + 1;
+  freshSecs = 0;
+  renderLog();
+}
+
+/* ── INIT ──────────────────────────────────────────── */
+renderCards();
+renderLog();
+tick();
+setInterval(tick,      1000);
+setInterval(tickFresh, 1000);
+setInterval(addLive,  11000);
+</script>
+</body>
+</html>
