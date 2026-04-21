@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ORACLE — DoW Intel Database</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width:100%; height:100%; background:#000; font-family:'Inter',sans-serif; overflow:hidden; color:#8A9AAA; }
+
+/* ═══════════════════════════════════
+   NAV RIBBON
+═══════════════════════════════════ */
+.nav-ribbon {
+  position:fixed; top:0; left:0; right:0; height:28px;
+  background:#050810; border-bottom:1px solid #0D1520;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 14px; z-index:9999;
+}
+.nav-ribbon-apps { display:flex; align-items:center; gap:2px; }
+.nav-ribbon-label { font-size:10px; color:#3A4A5A; letter-spacing:1.5px; text-transform:uppercase; font-weight:600; margin-right:10px; }
+.nav-app-btn {
+  padding:3px 10px; font-size:11px; font-weight:600; letter-spacing:1px;
+  text-transform:uppercase; font-family:'Inter',sans-serif;
+  background:transparent; border:1px solid transparent;
+  border-radius:2px; color:#3A4A5A; cursor:pointer;
+  text-decoration:none; display:inline-flex; align-items:center;
+  transition:color .12s, border-color .12s, background .12s;
+}
+.nav-app-btn:hover { color:#7A8A9A; border-color:#1A2230; }
+.nav-app-btn.current { color:#DDEEFF; border-color:#1A2230; background:rgba(221,238,255,.06); cursor:default; }
+
+.nav-export-btn {
+  padding:3px 10px; font-size:10px; font-weight:700; letter-spacing:1px;
+  text-transform:uppercase; font-family:'Inter',sans-serif;
+  background:rgba(204,51,51,.08); border:1px solid rgba(204,51,51,.3);
+  border-radius:2px; color:#E04444; cursor:pointer;
+  display:inline-flex; align-items:center; gap:5px;
+  transition:background .12s, border-color .12s;
+}
+.nav-export-btn:hover { background:rgba(204,51,51,.15); border-color:rgba(204,51,51,.5); }
+.ne-dot { width:4px; height:4px; border-radius:50%; background:#E04444; animation:pulse 1.4s ease-in-out infinite; }
+@keyframes pulse { 0%,100%{opacity:1}50%{opacity:.25} }
+
+/* Export overlay */
+.export-overlay {
+  display:none; position:fixed; inset:0; z-index:9998;
+  background:rgba(0,0,0,.75); backdrop-filter:blur(4px);
+  align-items:center; justify-content:center;
+}
+.export-overlay.vis { display:flex; }
+.export-box {
+  background:#080B0F; border:1px solid #1A2230; border-radius:3px;
+  width:520px; max-height:80vh; overflow-y:auto;
+  box-shadow:0 0 60px rgba(0,0,0,.9);
+}
+.export-header {
+  padding:16px 18px 14px; border-bottom:1px solid #1A2230;
+  display:flex; align-items:center; justify-content:space-between;
+  position:sticky; top:0; background:#080B0F; z-index:1;
+}
+.export-title { font-size:14px; font-weight:700; color:#DDEEFF; letter-spacing:.5px; }
+.export-sub { font-size:12px; color:#7A8A9A; margin-top:2px; }
+.export-close { background:none; border:none; color:#7A8A9A; cursor:pointer; font-size:18px; line-height:1; }
+.export-close:hover { color:#DDEEFF; }
+.export-body { padding:14px 18px; }
+.export-section { margin-bottom:16px; }
+.export-section-title {
+  font-size:11px; color:#7A8A9A; letter-spacing:1.5px; text-transform:uppercase;
+  font-weight:600; margin-bottom:8px; padding-bottom:5px; border-bottom:1px solid #1A2230;
+}
+.export-app-row {
+  display:flex; align-items:flex-start; justify-content:space-between;
+  gap:12px; padding:10px 12px; background:#050810;
+  border:1px solid #1A2230; border-radius:2px; margin-bottom:6px;
+}
+.ear-left { flex:1; }
+.ear-name { font-size:13px; font-weight:700; color:#DDEEFF; margin-bottom:3px; }
+.ear-desc { font-size:12px; color:#7A8A9A; line-height:1.5; }
+.ear-items { font-size:11px; color:#4A8FD4; margin-top:4px; letter-spacing:.3px; }
+.ear-btn {
+  flex-shrink:0; padding:5px 12px; font-size:11px; font-weight:700; letter-spacing:1px;
+  text-transform:uppercase; font-family:'Inter',sans-serif;
+  background:rgba(74,143,212,.08); border:1px solid rgba(74,143,212,.3);
+  border-radius:2px; color:#4A8FD4; cursor:pointer;
+  transition:background .12s, border-color .12s;
+  white-space:nowrap;
+}
+.ear-btn:hover { background:rgba(74,143,212,.18); border-color:rgba(74,143,212,.5); }
+.ear-btn.sent { color:#2ECC71; border-color:rgba(46,204,113,.4); background:rgba(46,204,113,.07); cursor:default; }
+.export-intel-preview { margin-top:10px; }
+.eip-label { font-size:11px; color:#3A4A5A; letter-spacing:1px; text-transform:uppercase; font-weight:600; margin-bottom:6px; }
+.eip-card { background:#000; border:1px solid #1A2230; border-left:2px solid rgba(224,68,68,.5); border-radius:2px; padding:8px 10px; margin-bottom:5px; }
+.eip-title { font-size:12px; font-weight:700; color:#E04444; margin-bottom:2px; }
+.eip-body { font-size:12px; color:#7A8A9A; line-height:1.5; }
+.eip-meta { font-size:11px; color:#3A4A5A; margin-top:3px; }
+.export-footer { padding:12px 18px 16px; border-top:1px solid #1A2230; display:flex; justify-content:flex-end; }
+.ef-btn { padding:7px 18px; background:transparent; border:1px solid #1A2230; border-radius:2px; color:#7A8A9A; font-size:12px; font-weight:700; font-family:'Inter',sans-serif; letter-spacing:1px; cursor:pointer; }
+.ef-btn:hover { border-color:#7A8A9A; color:#8A9AAA; }
+
+/* iframe host */
+.oracle-frame-host { position:fixed; top:28px; bottom:0; left:0; right:0; }
+.oracle-frame-host iframe { width:100%; height:100%; border:none; display:block; }
+</style>
+</head>
+<body>
+
+<!-- ═══ NAV RIBBON ═══ -->
+<div class="nav-ribbon">
+  <div class="nav-ribbon-apps">
+    <span class="nav-ribbon-label">SUITE</span>
+    <span class="nav-app-btn current">Oracle</span>
+    <a class="nav-app-btn" href="https://spicycarrot14.github.io/phalanx/" target="_self">Phalanx</a>
+    <a class="nav-app-btn" href="https://spicycarrot14.github.io/apex/" target="_self">Apex</a>
+    <a class="nav-app-btn" href="https://spicycarrot14.github.io/warden-sda/" target="_self">Warden</a>
+  </div>
+  <button class="nav-export-btn" onclick="openExport()">
+    <span class="ne-dot"></span>
+    Export Intel
+  </button>
+</div>
+
+<!-- ═══ EXPORT OVERLAY ═══ -->
+<div class="export-overlay" id="export-overlay">
+  <div class="export-box">
+    <div class="export-header">
+      <div>
+        <div class="export-title">↑ EXPORT INTEL — ORACLE</div>
+        <div class="export-sub">Select destination app to inject intel data</div>
+      </div>
+      <button class="export-close" onclick="closeExport()">✕</button>
+    </div>
+    <div class="export-body">
+
+      <div class="export-section">
+        <div class="export-section-title">Destination Apps</div>
+
+        <!-- PHALANX -->
+        <div class="export-app-row">
+          <div class="ear-left">
+            <div class="ear-name">PHALANX — Space Policy Wargame</div>
+            <div class="ear-desc">Inject threat-actor intel and RF/ASAT activity into the Phalanx policy matrix and wargame feed.</div>
+            <div class="ear-items">3 intel items · PRC/CNSA vector · Russia/VKS jamming · DEW positioning</div>
+          </div>
+          <button class="ear-btn" id="exp-btn-phalanx" onclick="markExported('phalanx', this)">Export →</button>
+        </div>
+
+        <!-- APEX -->
+        <div class="export-app-row">
+          <div class="ear-left">
+            <div class="ear-name">APEX — Orbital Data Center Command</div>
+            <div class="ear-desc">Push approach corridor threat data and proximity warnings into APEX mission queue for RAVEN-7 ops.</div>
+            <div class="ear-items">3 intel items · OSC-DEMO proximity · SHIJIAN-21 overlap · LEO congestion warning</div>
+          </div>
+          <button class="ear-btn" id="exp-btn-apex" onclick="markExported('apex', this)">Export →</button>
+        </div>
+
+        <!-- WARDEN -->
+        <div class="export-app-row">
+          <div class="ear-left">
+            <div class="ear-name">WARDEN — SDA Threat Response</div>
+            <div class="ear-desc">Send confirmed threat assessments and NORAD proximity alerts directly into the Warden threat panel.</div>
+            <div class="ear-items">3 intel items · NORAD-48821 proximity · COSMOS-2576 ASAT · SHIJIAN-21 orbital shift</div>
+          </div>
+          <button class="ear-btn" id="exp-btn-warden" onclick="markExported('warden', this)">Export →</button>
+        </div>
+      </div>
+
+      <div class="export-section">
+        <div class="export-section-title">Intel Preview — Active Export Items</div>
+        <div class="eip-card">
+          <div class="eip-title">NORAD-48821 — Proximity Alert Confirmed</div>
+          <div class="eip-body">ORACLE analysis confirms NORAD-48821 approach vector intersects USA-342 orbital corridor. Minimum separation: 1.2 km at T+00:14:08. Threat classification: DELIBERATE APPROACH. Confidence: 94%.</div>
+          <div class="eip-meta">EVT-2847 · CRITICAL · 04:11:32Z · Dest: Warden</div>
+        </div>
+        <div class="eip-card">
+          <div class="eip-title">COSMOS-2576 — ASAT Profile Detected</div>
+          <div class="eip-body">RF signature analysis indicates COSMOS-2576 has activated onboard payload consistent with directed-energy pre-positioning. Cross-referenced against known ASAT profiles. Recommend elevated monitoring of LEO assets.</div>
+          <div class="eip-meta">EVT-2851 · ELEVATED · 03:58:17Z · Dest: Warden</div>
+        </div>
+        <div class="eip-card">
+          <div class="eip-title">SHIJIAN-21 — Orbital Shift Logged</div>
+          <div class="eip-body">SHIJIAN-21 conducted unreported 14m/s retrograde burn at 03:44Z. New orbit: 512 × 518 km. Trajectory now overlaps USA-289 track within ±40 km for 3.2 orbital passes. Intel source: GEODSS + SSN cross-cue.</div>
+          <div class="eip-meta">EVT-2853 · ELEVATED · 03:44:02Z · Dest: Warden / Apex</div>
+        </div>
+        <div class="eip-card" style="border-left-color:rgba(74,143,212,.5)">
+          <div class="eip-title" style="color:#4A8FD4">PRC/CNSA — DEW Pre-Positioning (Wargame)</div>
+          <div class="eip-body">Three PRC orbital assets repositioned within 200 km of GEO belt. Pattern consistent with DEW pre-positioning doctrine observed in 2021 Wargame Scenario JADE SHIELD. Policy response matrix flagged.</div>
+          <div class="eip-meta">EVT-2849 · ELEVATED · 04:02:44Z · Dest: Phalanx</div>
+        </div>
+        <div class="eip-card" style="border-left-color:rgba(74,143,212,.5)">
+          <div class="eip-title" style="color:#4A8FD4">Russia/VKS — Broadband Jamming Active</div>
+          <div class="eip-body">Persistent broadband jamming detected across Ku/Ka bands affecting commercial relay nodes. Source attributed to VKS Murmansk-BN system. Affects APEX relay margins and Phalanx treaty verification windows.</div>
+          <div class="eip-meta">EVT-2855 · CRITICAL · 03:31:09Z · Dest: Phalanx / Apex</div>
+        </div>
+        <div class="eip-card" style="border-left-color:rgba(74,143,212,.5)">
+          <div class="eip-title" style="color:#4A8FD4">OSC-DEMO — Unregistered Approach Profile</div>
+          <div class="eip-body">OSC-DEMO trajectory does not match submitted UN Registry profile. Approach rate 0.45 m/s with active attitude control detected. ORACLE confidence OSC-DEMO is maneuvering: 87%. Apex approach window affected.</div>
+          <div class="eip-meta">EVT-2858 · ELEVATED · 04:08:19Z · Dest: Apex</div>
+        </div>
+      </div>
+
+    </div>
+    <div class="export-footer">
+      <button class="ef-btn" onclick="closeExport()">CLOSE</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ORACLE APP FRAME ═══ -->
+<div class="oracle-frame-host">
+  <iframe src="https://spicycarrot14.github.io/oracle/" id="oracle-iframe" title="ORACLE App"></iframe>
+</div>
+
+<script>
+function openExport() {
+  document.getElementById('export-overlay').classList.add('vis');
+}
+function closeExport() {
+  document.getElementById('export-overlay').classList.remove('vis');
+}
+
+function markExported(app, btn) {
+  btn.textContent = '✓ Sent';
+  btn.classList.add('sent');
+  // Store export state in sessionStorage so other tabs can check
+  sessionStorage.setItem('oracle_exported_' + app, 'true');
+}
+
+// Close on overlay background click
+document.getElementById('export-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeExport();
+});
+</script>
+
+</body>
+</html>
